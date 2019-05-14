@@ -1,0 +1,165 @@
+---
+title: "DATA 606 Final Project"
+author: "Yohannes Deboch"
+Date :  "May 05, 2019 "
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(ggplot2)
+```
+
+#### Introduction
+
+For this project, the main concentration will be identifying the contributing factors that actively influence the car consumption, that is the miles consumed per gallon on an individual vehicle. The analysis is mainly influenced by the fact that different vehicles are priced based on factors such as the mileage per gallon statistic, and on an actual real world issue as the mileage per gallon factor greatly influences the resale value of each model. For instance, a vehicle with a high mileage per gallon may seem to be of excessive consumption and that has a little fuel economy, and thus unaffordable to many. 
+
+The main goal of this project therefore is to find out whether there exists any relationship between the mileage per gallon variable and other factors such as the weight, horsepower, acceleration which actively influence the consumption level of a vehicle. 
+
+### Data Preparation
+
+Our data consideration was from the UCL library, https://archive.ics.uci.edu/ml/datasets/Auto+MPG. 
+
+```{r setup, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+cars <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data", header = FALSE)
+colnames(cars) <- c("mpg","cylinders","displacement","horsepower","weight","acceleration","model year","origin","car name")
+```
+
+### Objective of the Research
+
+The main objective of the research was to determine whether there were any influential factors that actively altered the record of car mileage per gallon in the active dataset. The research problem tried to answer the question on whether it would be possible to make predictions on car mileage per gallon using other underlying factors, which were all in the selected dataset
+
+### Cases 
+
+There were 397 cases where the effective analysis would only be achieved by considering all the datapoints since the initial assumption was that they were all influential. moreover, there were 8 variables in the dataset, all of which related to the features of a vehicle including the year of manufature, place of origin, the make and model, the engine displacement, number of cylinders as well as the horsepower.
+
+```{r message=FALSE, warning=FALSE}
+nrow(cars)
+```
+There were 397 cases. 
+
+
+### Data collection 
+
+The dataset in consideration is the Auto Mpg dataset, which was obtained from the UCI machine learning repository website. https://archive.ics.uci.edu/ml/datasets/Auto+MPG. 
+
+### Type of study 
+
+Since the study involves numeric variables, it will be an observational study, and will further be complemented by a case analysis using regression analysis with the mileage per gallon column being our dependent variable. 
+
+
+### Data Source 
+
+Data link 
+https://archive.ics.uci.edu/ml/datasets/Auto+MPG
+
+
+### Response Variable
+
+Mile per gallon (mpg) is the dependent variable. It's continuous.
+
+
+### Independent Variable
+
+The independent variables in the analysis are all the other columns except the mileage per gallon one, as seen below.
+
+```{r message=FALSE, warning=FALSE}
+colnames(cars)[2:8]
+```
+
+
+### Relevant summary statistics
+
+In its raw form, the dataset structure is in its required state, with all the variables being either in their numeric form, while the horspower and car name being factor variables. 
+
+```{r message=FALSE, warning=FALSE}
+str(cars)
+```
+
+observing the First and last few rows of the data
+```{r message=FALSE, warning=FALSE}
+head(cars)
+tail(cars)
+```
+
+
+
+
+```{r message=FALSE, warning=FALSE}
+summary(cars)
+```
+
+
+From the summary statistics, we can observe that the maximum weight of the cars in consideration is 5140, while the minimum is 1613. The mean and median, on the other hand, are relatively close to each other, suggesting that the distribution of the data may be close to a normal distribution
+
+```{r message=FALSE, warning=FALSE}
+boxplot(cars$mpg~cars$cylinders,main = "Mileage by Cylinders", outline=F, col="green")
+```
+
+
+From the boxplot above, it is evident that car mileage per gallon is high on cars with 4 cylinders, and low on cars with 8 cylinders. Similarly, car mileage per gallon differs with region, as seen on the boxplot below, with Origin 3 posing the cars with the highest level of miles per gallon. 
+
+```{r message=FALSE, warning=FALSE}
+boxplot(cars$mpg~cars$origin,main = "Milage by origin", outline=F, col="blue")
+```
+
+```{r message=FALSE, warning=FALSE}
+ggplot(cars, aes(x = weight, y = mpg)) +
+  geom_point(colour="red")+theme_light()+
+  labs(x = "Weight ",y = "MPG",
+    title = "Miles per gallon vs weight")
+
+```
+
+
+
+From the above plot, we can ascertain that indeed there exists a relationship between the weight of a car and the respective miles per gallon statistic. the trend shown by the scatterplot means that an increase in the weight of the vehicle results to a reduction in the miles per gallon consumed. This is a factor that may realistically hold, as weight increase demands more power, and as a result, more fuel is consumed.
+
+
+```{r}
+hist(cars$mpg,main="Distribution of Mpg", xlab="Mpg" ,col="red")
+```
+
+
+From the above mileage distribution, we can see that the datapoints tend to follow a normal distribution, with the mean points being concentrated more at the center, and thus the shape of the histogram. 
+
+```{r message=FALSE, warning=FALSE}
+cor(cars[,c(1,2,3,5,6,7)])
+```
+
+
+The above correlation matrix shows that there exists a high correlation between the mpg column variable and cylinder, displacement as well as weight. this may act as a support to further research, as high correlation always implies that the respective variables hold a tight relationship.
+
+### Problem analysis
+
+From the summary statistics, inferences were made on whether the data had any missing observations, as well as whether the variables exhibited strong correlation. The underlying problem was to determine whether there was any existing relation between the car mile per gallon and the other variables in the dataset. To ascertain on whether there exists a relationship between the mpg variable and other related variables, we proceed and fit a regression model, which will help in analysing any predictive power that these variables have. 
+
+
+```{r message=FALSE, warning=FALSE}
+LinearModel.1 <- lm(mpg ~ acceleration + cylinders + 
+  displacement + horsepower  + origin + weight, data=cars)
+summary(LinearModel.1)
+```
+
+
+From the fitted model, we deduce the following;
+The multiple and adjusted R squared values of the model are 0.8405 and 0.7882 respectively, which shows that the fitted model manages to explain and predict 84\% of the model. The F statistic value too is greater than one unit, proving that indeed there is an existing relationship between the mpg value and its predictors.  
+
+From this fitted regression model, we can then fit a stepwise regression model that will help in further identifying the best mpg predictors. 
+
+```{r}
+lm2<-step(LinearModel.1)
+summary(lm2)
+
+```
+
+The fitted stepwise regression model shows that the factors influencing the mpg variable are acceleration, weight, origin and horsepower, with all the variables being significant at 5\% level of confidence. 
+
+
+### Conclusion.
+
+This analysis involved an inferential problem on the factors influencing the mileage per gallon statistic, which is one of the most commonly used methods that people refer to when in need of a newer vehicle. Usually, based on personal preferences, individuals end up purchasing vehicles with the lowest mpg level. From our analysis, we did plot a regression model of the mile per gallon model, which upon further analysis, was deduced that the influencial factors included the acceleration, weight of the vehicle, country of origin as well as the horsepower factor. 
+This research may be tackled on a different approach, where one may consider the other numeric variables such as acceleration or horsepower, and determine whether there is any influence from these other variables. 
